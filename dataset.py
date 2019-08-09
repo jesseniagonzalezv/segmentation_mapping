@@ -8,9 +8,8 @@ data_path = Path('data')
 
 
 class WaterDataset(Dataset):
-    def __init__(self, img_paths: list, to_augment=False, transform=None, mode='train', limit=None):
+    def __init__(self, img_paths: list, transform=None, mode='train', limit=None):
         self.img_paths = img_paths
-        self.to_augment = to_augment
         self.transform = transform
         self.mode = mode
         self.limit = limit
@@ -43,13 +42,13 @@ class WaterDataset(Dataset):
 
 
 def to_float_tensor(img):
-    img=torch.from_numpy(img.transpose(2, 1, 0)).float()
+    img=torch.from_numpy(np.moveaxis(img, -1, 0)).float()  
     return img
 
 
 def load_image(path):
     img = np.load(str(path))
-    img=img.transpose((2, 1, 0)) 
+    img=img.transpose((1, 2, 0)) 
     #print('one image in', img.shape)
     return  img 
 
@@ -57,7 +56,7 @@ def load_mask(path):
     mask= np.zeros((512, 512))
     mask = np.load(str(path).replace('images', 'masks').replace(r'.npy', r'_a.npy'), 0)
     #print('one mask in ant T', mask.shape)
-    mask=mask.transpose(2, 1, 0).reshape(512,-1)
+    mask=mask.transpose(1, 2, 0).reshape(512,-1)
     mask=(mask > 0).astype(np.uint8)
     #print('before the mask',mask.shape)
     return mask

@@ -1,5 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from functools import reduce
+import itertools
+import torchvision.utils
+
+
+def reverse_transform2(inp): 
+    inp = inp.to('cpu').numpy().transpose((1, 2, 0))
+    mean = np.array([0.25864499, 0.26125361, 0.33177851])
+    std = np.array([0.20740983, 0.16791244, 0.20853833])
+    inp = std * inp + mean
+    inp = np.clip(inp, 0, 1)
+    inp = (inp).astype(np.float32)
+
+    return inp
+
 
 def plot_img_array(img_array, ncol=3):
     nrow = len(img_array) // ncol
@@ -10,30 +25,17 @@ def plot_img_array(img_array, ncol=3):
         plots[i // ncol, i % ncol]
         plots[i // ncol, i % ncol].imshow(img_array[i])
 
-from functools import reduce
+
 def plot_side_by_side(img_arrays):
     flatten_list = reduce(lambda x,y: x+y, zip(*img_arrays))
 
     plot_img_array(np.array(flatten_list), ncol=len(img_arrays))
 
-import itertools
-def plot_errors(results_dict, title):
-    markers = itertools.cycle(('+', 'x', 'o'))
-
-    plt.title('{}'.format(title))
-
-    for label, result in sorted(results_dict.items()):
-        plt.plot(result, marker=next(markers), label=label)
-        plt.ylabel('dice_coef')
-        plt.xlabel('epoch')
-        plt.legend(loc=3, bbox_to_anchor=(1, 0))
-
-    plt.show()
 
 def masks_to_colorimg(masks):
-    #colors = np.asarray([(201, 58, 64), (242, 207, 1), (0, 152, 75), (101, 172, 228),(56, 34, 132), (160, 194, 56)])
-    colors = np.asarray([(220, 0, 0)])
-    colorimg = np.ones((masks.shape[1], masks.shape[2], 3), dtype=np.float32) * 255
+
+    colors = np.asarray([(0, 2, 255)])
+    colorimg = np.zeros((masks.shape[1], masks.shape[2], 3), dtype=np.float32) * 255
     channels, height, width = masks.shape
 
     for y in range(height):
