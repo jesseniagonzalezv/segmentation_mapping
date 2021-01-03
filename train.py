@@ -25,7 +25,7 @@ import numpy as np
 import glob  
 import os
 
-from get_train_test_kfold import get_split_out, percent_split, get_split_in
+from get_train_test_kfold import percent_split, get_split_in
 
 from split_train_val import get_files_names
 from scalarmeanstd import meanstd
@@ -46,7 +46,7 @@ def main():
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
     arg('--device-ids', type=str, default='1', help='For example 0,1 to run on two GPUs')
-    arg('--channels', type=str, default='0,1,2,3,4', help='0:B, 1:G, 2:R, 3:NIR, 4:Red Edge')
+    arg('--channels', type=str, default='0,1,2', help='0:B, 1:G, 2:R')
     arg('--fold-out', type=int, default='0', help='fold train-val test')
     arg('--fold-in', type=int, default='0', help='fold train val')
     arg('--percent', type=float, default=1, help='percent of data')
@@ -55,7 +55,7 @@ def main():
     arg('--limit', type=int, default=10000, help='number of images in epoch')
     arg('--n-epochs', type=int, default=40)
     arg('--lr', type=float, default=1e-3)
-    arg('--model', type=str, default='UNet11', choices=['UNet11','UNet','AlbuNet34','SegNet'])
+    arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet'])
     arg('--dataset-path', type=str, default='dataset', help='main file,in which the dataset is:  data_VHR or data_HR')
     arg('--data-all', type=str, default='data_512', help='file with all the data')
 
@@ -113,8 +113,10 @@ def main():
     data_path = Path(args.dataset_path) 
     print("data_path:",data_path)
     #################################################################################  
+    #################################################################################  
     # Nested cross validation K-fold train test
     #train_val_file_names, test_file_names = get_split_out(data_path,data_all,args.fold_out)
+    #################################################################################
     #################################################################################  
     #eWe are consider the same test in all the cases
     train_val_file_names=np.array(sorted(glob.glob(str(data_path/args.train_val_file/'images')+ "/*.npy")))

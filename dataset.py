@@ -2,7 +2,7 @@
 This code is to load images and masks: data loader
 
 Input:
--Images and Masks  (H,W,CH)
+-Images and Masks  (CH,H,W)
 
 Output:
 - Images after transformations and convert to float tensor (CH,H,W)
@@ -59,26 +59,8 @@ def to_float_tensor(img):
 def load_image(path,channels): #in CH, H,W  out: H,W,CH
     img = np.load(str(path))
     img=img.transpose((1, 2, 0))  
-    dimsH=img.shape[0]
-    dimsW=img.shape[1]
-    dimsCH=len(channels)
+    return  img 
 
-
-    imga = np.zeros((dimsH,dimsW,dimsCH))
-
-    
-    for i,ch in enumerate(channels):
-        imga[:,:,i] =img[:,:,ch]
-        
-        
-    ##TRAIN RGB 3 o RGBNIR 4
-    #img = img[:,:,:4]
-    #TRAIN R 0 o NIR 4
-    #imga = np.zeros((160,160,2))
-    #imga[:,:,0] = img[:,:,0]
-    #imga[:,:,1] = img[:,:,3]
-
-    return  imga 
 
 def load_mask(path):   #H,W,CH   
     mask = np.load(str(path).replace('images', 'masks').replace(r'.npy', r'_a.npy'), 0)
@@ -86,6 +68,8 @@ def load_mask(path):   #H,W,CH
 #    mask =np .max(mask, axis=2)  #convert of 3 channel to 1 channel
 #    mask=(mask > 0).astype(np.uint8)
 #    return mask
-    mask=mask.transpose(1, 2, 0).reshape(mask.shape[1],-1)
-    mask=(mask > 0).astype(np.uint8)
+
+#### probar con 3 clases
+    mask=mask.transpose(1, 2, 0)#.reshape(mask.shape[1],-1)
+    mask = (mask[:,:,1]> 0).astype(np.uint8) 
     return mask

@@ -1,19 +1,18 @@
 """
-Create the Perusat dataset 
-Images with RGBNIR bands
+Create the dataset 
+Images with RGB bands
 
 Input:
 Original dataset: 
-The images from PeruSAT-1 satellite in .TIF format with a size approximately of 6000X6000size, 4 bands
-Labels were create with QGIS and defined by hand and also using the filter_mask_1step.py
+The images from  dron in JPG format with a size approximately of 4000x6000size, 3 bands
+Labels were create with Phtoshop and defined by hand 
 
 
 
 Output:
-Dataset: 915 images of 6 bands  
-Image output: C X H X W  
-C: 0 red, 1 green, 2 blue, 3 nir
-Label:C X H X W  
+Dataset: 49 images of 3 bands  
+Image output: CH X H X W  // CH: 0 red, 1 green, 2 blue
+Label:CH X H X W   //CH: complete
 """
 
 import argparse
@@ -87,8 +86,8 @@ def create_crop_dataset_masks(out_path_mask='data_512/masks', mask_filename='mak
 def main():
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
-    arg('--dataset-path', type=str, default='dataset', help='main file,in which the dataset is')
-    arg('--dataset-file', type=str, default='data_512', help='dataset of a specific size')
+    arg('--dataset-path', type=str, default='dataset/images_labels', help='main file,in which the dataset is')
+    arg('--dataset-file', type=str, default='data_512', help='dataset output of a specific size')
     args = parser.parse_args()    
     
     
@@ -97,7 +96,7 @@ def main():
     ####### Images File ##################
     data_path = Path(args.dataset_path) 
     
-    out_path_images = str(data_path/args.dataset_file/'images')
+    out_path_images = (args.dataset_file+'/images')
     print('out_path_images',out_path_images)
 
     myData = [["input_id", "source_id", "coordinates(rows,col)", "porcentaje"]]              
@@ -107,7 +106,7 @@ def main():
         writer.writerows(myData)  #list
 
     ####### Masks File ##################
-    out_path_mask= str(data_path/args.dataset_file/'masks')
+    out_path_mask= (args.dataset_file+'/masks')
     myData = [["input_id", "source_id", "coordinates(rows,col)"]] 
 
     myFile = open('splits_masks.csv', 'w')
@@ -122,7 +121,7 @@ def main():
 
    
     
-    dataset_images=np.array(sorted(glob.glob(str(data_path/'images')+ "/*.tif")))
+    dataset_images=np.array(sorted(glob.glob(str(data_path)+ "/*.JPG")))
 
     
     #np.array(sorted(list(predict_list.glob('*_fake.png'))))
@@ -131,7 +130,7 @@ def main():
     for i, input_path in enumerate(dataset_images):
         
             print(i,input_path)
-            mask_path =input_path.replace('images','masks')
+            mask_path =input_path.replace('JPG','tif')
             print(i,mask_path)        
             index_imgs=i
             img_black_paths=create_crop_dataset_images(out_path_images,input_path,index_imgs)

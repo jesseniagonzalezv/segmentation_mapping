@@ -81,10 +81,10 @@ def masks_to_colorimg(masks):
 def reverse_transform(inp,out_file='512'):
     inp = inp.transpose(1,2,0)
     if out_file=='512':                   
-        mean = np.array([0.22651606, 0.28676218, 0.23280623 ])
-        std = np.array([0.11427596, 0.1197355,  0.12576549] )  
+        mean = np.array([0.30834536, 0.29716143, 0.26178063 ])
+        std = np.array([0.12877709, 0.12047772, 0.10747423] )  
         inp = std * inp + mean
-        inp = np.clip(inp, 0, 1)*65535 #
+        inp = np.clip(inp, 0, 1)*255#
         inp = (inp/inp.max()*255).astype(np.uint8)
 
     else:
