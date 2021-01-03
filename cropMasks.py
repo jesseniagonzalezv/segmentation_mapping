@@ -7,7 +7,7 @@ from pathlib import Path
 import csv
 import numpy as np
 
-def splits_masks(in_path,out_path,input_filename,output_filename,output_filename_npy):
+def splits_masks(out_path,input_filename,output_filename,output_filename_npy,index_imgs):
 
     coordinates='{}-{},{}-{}'
 
@@ -21,7 +21,7 @@ def splits_masks(in_path,out_path,input_filename,output_filename,output_filename
             yield window, transform
 
 
-    with rio.open(os.path.join(in_path, input_filename)) as inds:
+    with rio.open(input_filename) as inds:
         tile_width, tile_height = 512, 512
         meta = inds.meta.copy()
 
@@ -30,20 +30,22 @@ def splits_masks(in_path,out_path,input_filename,output_filename,output_filename
 
             meta['transform'] = transform
             meta['width'], meta['height'] = window.width, window.height
-            outpath = os.path.join(out_path,output_filename.format(int(window.col_off), int(window.row_off)))
-            outpath_npy = str(os.path.join(out_path,output_filename_npy.format(int(window.col_off), int(window.row_off))))
+            
+            outpath = os.path.join(out_path,output_filename.format(index_imgs,int(window.col_off), int(window.row_off)))
+            outpath_npy = str(os.path.join(out_path,output_filename_npy.format(index_imgs,int(window.col_off), int(window.row_off))))
 
-
+            
             if((int(window.width)==512) and (int(window.height)==512)):
                 with rio.open(outpath, 'w', **meta) as outds:                
                     array=inds.read(window=window)
                     outds.write(array)     
                     #print(array.shape)
                     np.save(outpath_npy,array)
+                                             
 
 
-                input_id=str(output_filename.format(int(window.col_off), int(window.row_off)))     
-                source_id=str(os.path.join(out_path,output_filename.format(int(window.col_off), int(window.row_off))))
+                input_id=str(output_filename.format(index_imgs,int(window.col_off), int(window.row_off)))     
+                source_id=str(os.path.join(out_path,output_filename.format(index_imgs,int(window.col_off), int(window.row_off))))
                 coordinates2= str(coordinates.format(int(window.row_off),int(window.row_off)+int(window.width),int(window.col_off),int(window.col_off)+int(window.height)))
 
                 myData = [[input_id, source_id, coordinates2,]]              

@@ -1,15 +1,23 @@
+'''
+This code is to load images and masks: data loader
+
+Input:
+-Images and Masks  (H,W,CH)
+
+Output:
+- Images after transformations and convert to float tensor (CH,H,W)
+''' 
+
 import torch
 import numpy as np
-import cv2
 from torch.utils.data import Dataset
-from pathlib import Path
-
-data_path = Path('data')
 
 
-class WaterDataset(Dataset):
-    def __init__(self, img_paths: list, transform=None, mode='train', limit=None):
+
+class ImagesDataset(Dataset):
+    def __init__(self, img_paths: list, channels:list, transform=None, mode='train', limit=None):
         self.img_paths = img_paths
+        self.channels =channels
         self.transform = transform
         self.mode = mode
         self.limit = limit
@@ -25,8 +33,10 @@ class WaterDataset(Dataset):
             img_file_name = self.img_paths[idx]
         else:
             img_file_name = np.random.choice(self.img_paths)
+            
 
-        img = load_image(img_file_name)
+        img = load_image(img_file_name,self.channels )
+        #print(self.mode)
 
         if self.mode == 'train':
             mask = load_mask(img_file_name)
@@ -38,7 +48,7 @@ class WaterDataset(Dataset):
             mask = np.zeros(img.shape[:2])
             img, mask = self.transform(img, mask)
 
-            return to_float_tensor(img), str(img_file_name)
+            return to_float_tensor(img), str(img_file_name) 
 
 
 def to_float_tensor(img):
@@ -46,17 +56,36 @@ def to_float_tensor(img):
     return img
 
 
-def load_image(path):
+def load_image(path,channels): #in CH, H,W  out: H,W,CH
     img = np.load(str(path))
-    img=img.transpose((1, 2, 0)) 
-    #print('one image in', img.shape)
-    return  img 
+    img=img.transpose((1, 2, 0))  
+    dimsH=img.shape[0]
+    dimsW=img.shape[1]
+    dimsCH=len(channels)
 
-def load_mask(path):   
-    mask= np.zeros((512, 512))
+
+    imga = np.zeros((dimsH,dimsW,dimsCH))
+
+    
+    for i,ch in enumerate(channels):
+        imga[:,:,i] =img[:,:,ch]
+        
+        
+    ##TRAIN RGB 3 o RGBNIR 4
+    #img = img[:,:,:4]
+    #TRAIN R 0 o NIR 4
+    #imga = np.zeros((160,160,2))
+    #imga[:,:,0] = img[:,:,0]
+    #imga[:,:,1] = img[:,:,3]
+
+    return  imga 
+
+def load_mask(path):   #H,W,CH   
     mask = np.load(str(path).replace('images', 'masks').replace(r'.npy', r'_a.npy'), 0)
-    #print('one mask in ant T', mask.shape)
-    mask=mask.transpose(1, 2, 0).reshape(512,-1)
+    #mask=mask.reshape(mask.shape[1],-1)
+#    mask =np .max(mask, axis=2)  #convert of 3 channel to 1 channel
+#    mask=(mask > 0).astype(np.uint8)
+#    return mask
+    mask=mask.transpose(1, 2, 0).reshape(mask.shape[1],-1)
     mask=(mask > 0).astype(np.uint8)
-    #print('before the mask',mask.shape)
     return mask
