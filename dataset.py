@@ -11,8 +11,7 @@ Output:
 import torch
 import numpy as np
 from torch.utils.data import Dataset
-
-
+from skimage.color import rgb2gray
 
 class ImagesDataset(Dataset):
     def __init__(self, img_paths: list, channels:list, transform=None, mode='train', limit=None):
@@ -61,15 +60,41 @@ def load_image(path,channels): #in CH, H,W  out: H,W,CH
     img=img.transpose((1, 2, 0))  
     return  img 
 
+def mask_to_onehot(mask):
 
+    maskgrey = rgb2gray(mask)
+    #Constant values for grey mask classes (terrain,structures,roads)
+    unique = [0.15043333333333334,0.5098819607843137,0.8802066666666667]
+
+    #Getting 1 channel index array
+    count = 0
+    for v in unique:
+        maskgrey[maskgrey==v]=count
+        count+=1
+        
+    #Converting index array to one hot
+    maskgrey = maskgrey.astype(np.int64)
+    maskgrey = torch.nn.functional.one_hot(torch.from_numpy(maskgrey),num_classes=3)
+    maskgrey = maskgrey.numpy()
+    
+    mask = maskgrey[:,:,1] #select structure class
+    #mask = maskgrey[:,:,0] #select terrain class
+    #mask = maskgrey[:,:,2] #select road class
+    return mask
+    
 def load_mask(path):   #H,W,CH   
     mask = np.load(str(path).replace('images', 'masks').replace(r'.npy', r'_a.npy'), 0)
+    
     #mask=mask.reshape(mask.shape[1],-1)
 #    mask =np .max(mask, axis=2)  #convert of 3 channel to 1 channel
 #    mask=(mask > 0).astype(np.uint8)
 #    return mask
 
 #### probar con 3 clases
-    mask=mask.transpose(1, 2, 0)#.reshape(mask.shape[1],-1)
-    mask = (mask[:,:,1]> 0).astype(np.uint8) 
+    mask = mask.transpose(1, 2, 0)#.reshape(mask.shape[1],-1)
+    mask = mask_to_onehot(mask)
+    #mask = (mask[:,:,1]> 0).astype(np.uint8) 
     return mask
+
+
+    
