@@ -16,18 +16,13 @@ The dataset is organized in the following way::
         │           ├── images
         │           └── masks
         ├── predictions
-        │           ├── 512
         ├── history
-        │          ├── 512
-        ├── logs
-        │          ├── mapping
-        │              ├── 512
         │ ......................
 
 Dataset 
 
 ### Run each Model:
-        Run: Notebook 
+        Run: 
         1. python train.sh
         2. python plotting.sh  (need path roots)
 
