@@ -15,7 +15,7 @@ class DualCompose:
     def __call__(self, x, mask=None):
         for t in self.transforms:
             x, mask = t(x, mask)
-        return x, mask
+        return x, mask 
 
 class CenterCrop:
     def __init__(self, size):
@@ -94,20 +94,22 @@ class ImageOnly:
     def __call__(self, x, mask=None):
         return self.trans(x), mask
     
+
     
-class Normalize:
-    def __init__(self, mean=(0.12121853, 0.10802471, 0.11964872, 0.137894), std=(0.09692554, 0.07299206, 0.06229836, 0.11779822)):
+class Normalize:  
+    def __init__(self,maxi=255, mean=(0.11383374, 0.10310764, 0.11405758, 0.13963067,0.13963067), std=(0.08972336, 0.06713878, 0.05742005, 0.11076992,0.13963067)):
+        #mean=(0.11239524, 0.101936, 0.11311523, 0.13813571), std=(0.08964322, 0.06702993, 0.05725554, 0.11082901)
         self.mean = mean
         self.std = std
+        self.maxi= maxi
 
     def __call__(self, img):
         img= img.astype(np.float32)
-        max_pixel_value=3413
+        max_pixel_value=self.maxi 
         img = img/max_pixel_value 
         img -= np.ones(img.shape) * self.mean
         img /= np.ones(img.shape) * self.std
         return img
-
 
 
 class RandomRotate90:
