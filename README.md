@@ -7,7 +7,7 @@ How to run
 The dataset is organized in the following way::
 ::
 
-        ├── data
+        ├── dataset
         │   ├── test
         │           ├── images
         │           └── masks
@@ -28,6 +28,6 @@ Dataset
 
 ### Run each Model:
         Run: Notebook 
-        1. python train.sh
+        1. python run.sh
         2. python plotting.sh  (need path roots)
 
