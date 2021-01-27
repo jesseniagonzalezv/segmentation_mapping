@@ -15,7 +15,7 @@ import torch.backends.cudnn as cudnn
 import torch.backends.cudnn
 import json
 from models import UNet11,UNet, AlbuNet34, SegNet
-#from deeplabv3 import DeepLabV3
+from deeplabv3 import deeplabv3_resnet101
 
 from dataset import ImagesDataset
 from torch.optim import lr_scheduler   ####
@@ -54,7 +54,7 @@ def main():
     arg('--limit', type=int, default=10000, help='number of images in epoch')
     arg('--n-epochs', type=int, default=40)
     arg('--lr', type=float, default=1e-3)
-    arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet'])
+    arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet','DeepLabV3'])
     arg('--dataset-path', type=str, default='dataset', help='main file,in which the dataset is:  data_VHR or data_HR')
     arg('--data-all', type=str, default='data_512', help='file with all the data')
 
@@ -69,7 +69,7 @@ def main():
     root = Path(args.root)
     root.mkdir(exist_ok=True, parents=True)
 
-    num_classes = 1
+    num_classes = 3
     channels=list(map(int, args.channels.split(','))) #5
     input_channels=len(channels)
     print('channels:',channels,'len',input_channels)
@@ -84,7 +84,8 @@ def main():
     elif args.model == 'SegNet':
         model = SegNet(num_classes=num_classes, num_input_channels=input_channels, pretrained=False)
     elif args.model == 'DeepLabV3':
-        model = DeepLabV3(num_classes=num_classes, in_channels=input_channels)
+        model = deeplabv3_resnet101(pretrained=False, progress=True, num_classes=num_classes)
+        #model = models.segmentation.deeplabv3_resnet101(pretrained=False, progress=True, num_classes=num_classes)
     else:
         model = UNet11(num_classes=num_classes, input_channels=input_channels)
 
