@@ -6,6 +6,8 @@ from loss import dice_loss,metric_jaccard  #this is loss
 from dataset import ImagesDataset
 import torch.nn.functional as F
 from models import UNet11, UNet, AlbuNet34,SegNet
+from deeplabv3 import deeplabv3_resnet101
+
 import numpy as np
 import torch
 import glob

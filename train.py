@@ -15,7 +15,8 @@ import torch.backends.cudnn as cudnn
 import torch.backends.cudnn
 import json
 from models import UNet11,UNet, AlbuNet34, SegNet
-#from deeplabv3 import DeepLabV3
+from deeplabv3 import deeplabv3_resnet101
+
 
 from dataset import ImagesDataset
 from torch.optim import lr_scheduler   ####
@@ -84,7 +85,7 @@ def main():
     elif args.model == 'SegNet':
         model = SegNet(num_classes=num_classes, num_input_channels=input_channels, pretrained=False)
     elif args.model == 'DeepLabV3':
-        model = DeepLabV3(num_classes=num_classes, in_channels=input_channels)
+        model = deeplabv3_resnet101(pretrained=False, progress=True, num_classes=num_classes)
     else:
         model = UNet11(num_classes=num_classes, input_channels=input_channels)
 
