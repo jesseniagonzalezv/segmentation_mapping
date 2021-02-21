@@ -55,7 +55,7 @@ def main():
     arg('--limit', type=int, default=10000, help='number of images in epoch')
     arg('--n-epochs', type=int, default=40)
     arg('--lr', type=float, default=1e-3)
-    arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet'])
+    arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet','DeepLabV3'])
     arg('--dataset-path', type=str, default='dataset', help='main file,in which the dataset is:  data_VHR or data_HR')
     arg('--data-all', type=str, default='data_512', help='file with all the data')
 

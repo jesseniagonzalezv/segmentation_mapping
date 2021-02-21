@@ -90,10 +90,10 @@ def plot_prediction(stage='test',name_file='_VHR_60_fake',out_file='VHR',name_mo
     pred_images = np.load(pred_file)
     val_label = np.load(label_file)
     print(val_images.shape,val_label.shape,pred_images.shape)
-    input_images_rgb = [helper.reverse_transform(x,out_file) for x in val_images[:30,0,:3,:,:]]   #new metrics 30 cantidad de imagenes to plot
+    input_images_rgb = [helper.reverse_transform(x,out_file) for x in val_images[:,0,:3,:,:]]   #new metrics 30 cantidad de imagenes to plot
     # Map each channel (i.e. class) to each color
-    target_masks_rgb = [helper.masks_to_colorimg(x) for x in val_label[:30,0,:3,:,:]]
-    pred_rgb = [helper.masks_to_colorimg(x) for x in pred_images[:30,0,:,:,:]]
+    target_masks_rgb = [helper.masks_to_colorimg(x) for x in val_label[:,0,:3,:,:]]
+    pred_rgb = [helper.masks_to_colorimg(x) for x in pred_images[:,0,:,:,:]]
 
     name_output=("{}{}_{}_foldout{}_foldin{}_{}epochs").format(stage, name_file,name_model,fold_out,fold_in,epochs)
   
@@ -108,7 +108,7 @@ def main():
     arg('--out-file', type=str, default='160', help='For example 160 or 512')
     arg('--stage', type=str, default='test', help='For example test or val')
     arg('--name-file', type=str, default='_8_percent', help='For example _6_percent')
-    arg('--name-model', type=str, default='UNet11', choices=['UNet11','UNet','AlbuNet34','SegNet'])
+    arg('--name-model', type=str, default='UNet11', choices=['UNet11','UNet','AlbuNet34','SegNet','DeepLabV3'])
     arg('--fold-out', type=int, help='fold train test', default=0)
     arg('--fold-in', type=int, help='fold train val', default=0)  
     arg('--n-epochs', type=int, help='epochs in which the model was trained', default=40)  
