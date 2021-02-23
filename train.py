@@ -38,7 +38,12 @@ from transformsdata import (DualCompose,
                         HorizontalFlip,
                         Rotate,
                         CenterCrop,
-                        VerticalFlip)
+                        VerticalFlip,
+                        ColorSpaceYUV,
+                        ColorSpaceYCbCr,
+                        ColorSpaceLab,
+                        ColorSpaceLuv,
+                        ColorSpaceC1C2C3)
 
 
 
@@ -63,7 +68,6 @@ def main():
     #arg('--out-file', type=str, default='VHR', help='the file in which save the outputs')
     arg('--train-val-file', type=str, default='train_val_512', help='name of the train-val file VHR:train_val_160 or train_val_512' )
     arg('--test-file', type=str, default='test_512', help='name of the test file test_512 or test_160' )
-
 
 
     args = parser.parse_args()    
@@ -153,12 +157,14 @@ def main():
                 HorizontalFlip(),
                 VerticalFlip(),
                 Rotate(),    
-                ImageOnly(Normalize(mean=mean_values,std= std_values))
+                ImageOnly(Normalize(mean=mean_values,std= std_values)),
+                ColorSpaceC1C2C3()
     ])
 
     val_transform = DualCompose([
                 CenterCrop(int(args.dataset_file)),
-                ImageOnly(Normalize(mean=mean_values, std=std_values))
+                ImageOnly(Normalize(mean=mean_values, std=std_values)),
+                ColorSpaceC1C2C3()
     ])
 
     train_loader = make_loader(train_file_names,channels, shuffle=True, transform=train_transform, mode='train', batch_size = args.batch_size)  

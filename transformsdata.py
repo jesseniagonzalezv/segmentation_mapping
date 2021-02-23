@@ -39,9 +39,8 @@ class CenterCrop:
         if mask is not None:
             mask = mask[y1:y2, x1:x2]
 
-        return img, mask
-
-
+        return img, mask 
+    
 class HorizontalFlip:
     def __init__(self, prob=0.5):
         self.prob = prob
@@ -124,5 +123,41 @@ class RandomRotate90:
                 mask = np.rot90(mask, factor)
         return img.copy(), mask.copy()
 
+class ColorSpaceYUV:
+    #def __init__(self):
+    
+    def __call__(self, img, mask=None):
+        YUV = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
+        return YUV, mask
+
+class ColorSpaceYCbCr:
+    #def __init__(self):
+    
+    def __call__(self, img, mask=None):
+        YCbCr = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
+        return YCbCr, mask
+
+class ColorSpaceLab:
+    #def __init__(self):
+    
+    def __call__(self, img, mask=None):
+        Lab = cv2.cvtColor(img, cv2.COLOR_RGB2Lab)
+        return Lab, mask
+    
+class ColorSpaceLuv:
+    #def __init__(self):
+    
+    def __call__(self, img, mask=None):
+        Luv = cv2.cvtColor(img, cv2.COLOR_RGB2Luv)
+        return Luv, mask    
+
+class ColorSpaceC1C2C3:
+    #def __init__(self):
+    
+    def __call__(self, img, mask=None):
+        img3 = img.astype(np.float32)+0.001 #to avoid division by 0
+        c1c2c3 = np.arctan(img3/np.dstack((cv2.max(img3[...,1], img3[...,2]), cv2.max(img3[...,0], img3[...,2]),cv2.max(img3[...,0], img3[...,1]))))
+        
+        return c1c2c3, mask    
 
 

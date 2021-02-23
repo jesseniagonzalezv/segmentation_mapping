@@ -14,7 +14,7 @@ from metrics_prediction_2 import calc_loss,print_metrics
 
 
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-print(device)
+#print(device)
 if (device=='cpu'):
     print('CUDA is not available.  Training on CPU ...')
 else:
@@ -53,7 +53,7 @@ def train_model(dataset_file,name_file, model, optimizer, scheduler,dataloaders,
             print("dataloader:",len(dataloaders[phase]) )
             f.write("dataloader:" + str(len(dataloaders[phase])) + "\n") 
             for inputs, labels in dataloaders[phase]:
-               # print(device)
+                #print(device)
                 inputs = inputs.to(device)
                 labels = labels.to(device)             
 
