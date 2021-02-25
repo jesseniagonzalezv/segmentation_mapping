@@ -16,6 +16,7 @@ import torch.backends.cudnn
 import json
 from models import UNet11,UNet, AlbuNet34, SegNet
 from deeplabv3 import deeplabv3_resnet101
+from fcn import fcn_resnet101
 
 from dataset import ImagesDataset
 from torch.optim import lr_scheduler   ####
@@ -54,7 +55,7 @@ def main():
     arg('--limit', type=int, default=10000, help='number of images in epoch')
     arg('--n-epochs', type=int, default=40)
     arg('--lr', type=float, default=1e-3)
-    arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet','DeepLabV3'])
+    arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet','DeepLabV3','FCN'])
     arg('--dataset-path', type=str, default='dataset', help='main file,in which the dataset is:  data_VHR or data_HR')
     arg('--data-all', type=str, default='data_512', help='file with all the data')
 
@@ -86,6 +87,9 @@ def main():
     elif args.model == 'DeepLabV3':
         model = deeplabv3_resnet101(pretrained=False, progress=True, num_classes=num_classes)
         #model = models.segmentation.deeplabv3_resnet101(pretrained=False, progress=True, num_classes=num_classes)
+    elif args.model == 'FCN':
+        model = fcn_resnet101(pretrained=False, progress=True, num_classes=num_classes)
+        #model = models.segmentation.fcn_resnet101(pretrained=False, progress=True, num_classes=num_classes)
     else:
         model = UNet11(num_classes=num_classes, input_channels=input_channels)
 

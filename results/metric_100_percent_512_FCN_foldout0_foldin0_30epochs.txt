@@ -1,0 +1,16 @@
+Training mean_values:[[0.30825802 0.29718993 0.26157139]], std_values:[[0.12701089 0.11850233 0.10554538]] 
+train_512
+dice_metric: 0.840514, std: 0.148411 
+dice_per_class: [0.8529113  0.8552794  0.81335217] 
+jaccard_metric: 0.782461, std: 0.170743  
+jaccard_per_class: [0.7788058  0.7917792  0.77679724] 
+val_512
+dice_metric: 0.794667, std: 0.163531 
+dice_per_class: [0.82625574 0.8249467  0.73279923] 
+jaccard_metric: 0.729855, std: 0.186861  
+jaccard_per_class: [0.7428302  0.75575507 0.6909793 ] 
+test_512
+dice_metric: 0.808097, std: 0.172111 
+dice_per_class: [0.8391125 0.816154  0.769024 ] 
+jaccard_metric: 0.748080, std: 0.198078  
+jaccard_per_class: [0.7623712 0.7531175 0.7287503] 

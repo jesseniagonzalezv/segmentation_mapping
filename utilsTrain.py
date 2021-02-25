@@ -62,7 +62,7 @@ def train_model(dataset_file,name_file, model, optimizer, scheduler,dataloaders,
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     loss = calc_loss(outputs, labels, metrics)
- 
+                    
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
