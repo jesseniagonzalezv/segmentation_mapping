@@ -56,7 +56,7 @@ def main():
     arg('--n-epochs', type=int, default=40)
     arg('--lr', type=float, default=1e-3)
     arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet','DeepLabV3','FCN'])
-    arg('--dataset-path', type=str, default='dataset', help='main file,in which the dataset is:  data_VHR or data_HR')
+    arg('--dataset-path', type=str, default='/home/gjimenez/AI-PUCP/dataset', help='main file,in which the dataset is:  data_VHR or data_HR')
     arg('--data-all', type=str, default='data_512', help='file with all the data')
 
     arg('--dataset-file', type=str, default='512', help='it depends of the resolution of the dataset 160x160 or 512x512' )
@@ -150,7 +150,10 @@ def main():
             pin_memory=torch.cuda.is_available() 
         )
     max_values, mean_values, std_values=meanstd(train_file_names, val_file_names,test_file_names,str(data_path/data_all),input_channels) #_60 
-    print(max_values,mean_values, std_values)
+    mean_values = [0.485, 0.456, 0.406]
+    std_values = [0.229, 0.224, 0.225]
+    
+    print('MEAN_VALUES:',max_values,mean_values, std_values)
        
     train_transform = DualCompose([
                 CenterCrop(int(args.dataset_file)),

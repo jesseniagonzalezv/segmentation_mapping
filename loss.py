@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 
 def dice_loss(pred, target, smooth = 1.):

@@ -3,6 +3,8 @@ import numpy as np
 from functools import reduce
 import itertools
 import torchvision.utils
+import pdb
+from skimage import color
 
 def values_metric(filedata,name_metric):
     m_metric = []
@@ -10,6 +12,8 @@ def values_metric(filedata,name_metric):
         i = i.strip(" ")
         if str(i).startswith(name_metric):
             i = i.split(" ")
+            if i[0] in ['jaccard_class:','dice_class:']: 
+                continue
             m_metric.append(float(i[1]))
     return m_metric
 
@@ -48,18 +52,12 @@ def plot_side_by_side(img_arrays,filedata,out_file, name_output,save=0):
     plot_img_array(np.array(flatten_list),filedata,save,out_file, name_output, ncol=len(img_arrays))
 
 def masks_to_colorimg_3clases(masks):
-
-    colors = np.asarray([(240, 0, 0), (0, 240, 0), (0, 0, 240)])
-    colorimg = np.zeros((masks.shape[1], masks.shape[2], 3), dtype=np.uint8) * 255
-    channels, height, width = masks.shape
-
-    for y in range(height):
-        for x in range(width):
-            selected_colors = colors[masks[:,y,x] > 0.2]
-
-            if len(selected_colors) > 0:
-                colorimg[y,x,:] = np.mean(selected_colors, axis=0)
-
+    
+    mask = np.argmax(masks, axis=0)    
+    colorimg = color.label2rgb(mask, colors=[[94/255, 0, 1],[1, 106/255, 0],[1, 238/255, 0]],bg_label=-1)
+    #colors = np.asarray([(240, 0, 0), (0, 240, 0), (0, 0, 240)])
+    colorimg = colorimg*255
+    
     return colorimg.astype(np.uint8)
 
 

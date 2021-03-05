@@ -5,7 +5,8 @@ from PIL import Image
 import glob
 import helper
 import argparse
-
+import pdb
+import matplotlib.pyplot as plt
 
 def read_metric(out_file,stage,name_file, name,name_model,fold_out,fold_in,epochs):
     loss_file = open(("predictions/{}/pred_loss_{}{}_{}_foldout{}_foldin{}_{}epochs.txt").format(out_file,stage,name_file,name_model,fold_out,fold_in,epochs))
@@ -40,7 +41,6 @@ def plot_history_train(out_file,name_file,name_model,fold_out,fold_in,epochs):
     file = open(("history/{}/history_model{}_{}_foldout{}_foldin{}_{}epochs.txt").format(out_file,name_file,name_model,fold_out,fold_in,epochs), "r")
     
 
-        
     filedata = file.read() 
     filedata = filedata.replace("dataloader",",dataloader")
     filedata = filedata.replace("saving",",saving")
@@ -92,8 +92,8 @@ def plot_prediction(stage='test',name_file='_VHR_60_fake',out_file='VHR',name_mo
     print(val_images.shape,val_label.shape,pred_images.shape)
     input_images_rgb = [helper.reverse_transform(x,out_file) for x in val_images[:30,0,:3,:,:]]   #new metrics 30 cantidad de imagenes to plot
     # Map each channel (i.e. class) to each color
-    target_masks_rgb = [helper.masks_to_colorimg(x) for x in val_label[:30,0,:3,:,:]]
-    pred_rgb = [helper.masks_to_colorimg(x) for x in pred_images[:30,0,:,:,:]]
+    target_masks_rgb = [helper.masks_to_colorimg_3clases(x) for x in val_label[:30,0,:3,:,:]]
+    pred_rgb = [helper.masks_to_colorimg_3clases(x) for x in pred_images[:30,0,:,:,:]]
 
     name_output=("{}{}_{}_foldout{}_foldin{}_{}epochs").format(stage, name_file,name_model,fold_out,fold_in,epochs)
   
@@ -108,7 +108,7 @@ def main():
     arg('--out-file', type=str, default='160', help='For example 160 or 512')
     arg('--stage', type=str, default='test', help='For example test or val')
     arg('--name-file', type=str, default='_8_percent', help='For example _6_percent')
-    arg('--name-model', type=str, default='UNet11', choices=['UNet11','UNet','AlbuNet34','SegNet','DeepLabV3'])
+    arg('--name-model', type=str, default='UNet11', choices=['UNet11','UNet','AlbuNet34','SegNet','DeepLabV3','FCN'])
     arg('--fold-out', type=int, help='fold train test', default=0)
     arg('--fold-in', type=int, help='fold train val', default=0)  
     arg('--n-epochs', type=int, help='epochs in which the model was trained', default=40)  
