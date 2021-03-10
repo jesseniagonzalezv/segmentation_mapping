@@ -43,7 +43,17 @@ class ImagesDataset(Dataset):
 
             img, mask = self.transform(img, mask)
 
-            return to_float_tensor(img), torch.from_numpy(np.expand_dims(mask, 0)).float()
+          #  return to_float_tensor(img), torch.from_numpy(np.expand_dims(mask, 0)).float()
+            maskTensor = None
+
+            if(mask.ndim == 2):
+                maskTensor = torch.from_numpy(np.expand_dims(mask, 0)).float()
+            else:
+                maskTensor = torch.from_numpy(mask.transpose((2, 0, 1))).float() #???
+
+            return to_float_tensor(img), maskTensor
+        
+        ###
         else:
             mask = np.zeros(img.shape[:2])
             img, mask = self.transform(img, mask)
@@ -56,7 +66,7 @@ def to_float_tensor(img):
     return img
 
 
-def load_image(path,channels): #in CH, H,W  out: H,W,CH
+def load_image(path,channels): #in CH 0, H 1,W 2  out: H 1,W 2,CH 0
     img = np.load(str(path))
     img=img.transpose((1, 2, 0))  
     return  img 
@@ -78,7 +88,9 @@ def mask_to_onehot(mask):
     maskgrey = torch.nn.functional.one_hot(torch.from_numpy(maskgrey),num_classes=3)
     maskgrey = maskgrey.numpy()
     
-    mask = maskgrey[:,:,2] #select structure class
+    ### mask = maskgrey[:,:,2] #select structure class
+    mask = maskgrey # Multiclass
+    #mask = maskgrey[:,:,1] #select structure class
     #mask = maskgrey[:,:,0] #select terrain class
     #mask = maskgrey[:,:,2] #select road class
     return mask

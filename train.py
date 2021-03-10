@@ -16,7 +16,7 @@ import torch.backends.cudnn
 import json
 from models import UNet11,UNet, AlbuNet34, SegNet
 from deeplabv3 import deeplabv3_resnet101
-
+from fcn import fcn_resnet101
 
 from dataset import ImagesDataset
 from torch.optim import lr_scheduler   ####
@@ -55,8 +55,9 @@ def main():
     arg('--limit', type=int, default=10000, help='number of images in epoch')
     arg('--n-epochs', type=int, default=40)
     arg('--lr', type=float, default=1e-3)
-    arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet','DeepLabV3'])
-    arg('--dataset-path', type=str, default='dataset', help='main file,in which the dataset is:  data_VHR or data_HR')
+     arg('--model', type=str, default='UNet', choices=['UNet11','UNet','SegNet','DeepLabV3','FCN'])
+    arg('--dataset-path', type=str, default='/home/gjimenez/AI-PUCP/dataset', help='main file,in which the dataset is:  data_VHR or data_HR')
+    #arg('--dataset-path', type=str, default='dataset', help='main file,in which the dataset is:  data_VHR or data_HR')
     arg('--data-all', type=str, default='data_512', help='file with all the data')
 
     arg('--dataset-file', type=str, default='512', help='it depends of the resolution of the dataset 160x160 or 512x512' )
@@ -70,7 +71,7 @@ def main():
     root = Path(args.root)
     root.mkdir(exist_ok=True, parents=True)
 
-    num_classes = 1
+    num_classes = 3
     channels=list(map(int, args.channels.split(','))) #5
     input_channels=len(channels)
     print('channels:',channels,'len',input_channels)
@@ -86,6 +87,9 @@ def main():
         model = SegNet(num_classes=num_classes, num_input_channels=input_channels, pretrained=False)
     elif args.model == 'DeepLabV3':
         model = deeplabv3_resnet101(pretrained=False, progress=True, num_classes=num_classes)
+        #model = models.segmentation.deeplabv3_resnet101(pretrained=False, progress=True, num_classes=num_classes)
+    elif args.model == 'FCN':
+        model = fcn_resnet101(pretrained=False, progress=True, num_classes=num_classes)
     else:
         model = UNet11(num_classes=num_classes, input_channels=input_channels)
 
@@ -145,9 +149,11 @@ def main():
             batch_size=batch_size, 
             pin_memory=torch.cuda.is_available() 
         )
-    max_values, mean_values, std_values=meanstd(train_file_names, val_file_names,test_file_names,str(data_path/data_all),input_channels) #_60 
+    #max_values, mean_values, std_values=meanstd(train_file_names, val_file_names,test_file_names,str(data_path/data_all),input_channels) #_60 
     print(max_values,mean_values, std_values)
-       
+    mean_values = [0.485, 0.456, 0.406]
+    std_values = [0.229, 0.224, 0.225]
+    
     train_transform = DualCompose([
                 CenterCrop(int(args.dataset_file)),
                 HorizontalFlip(),

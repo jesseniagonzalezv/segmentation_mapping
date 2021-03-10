@@ -34,21 +34,33 @@ def calc_loss(pred, target, metrics,phase='train', bce_weight=0.5):
         pred=(pred >0.50).float()  #with 0.55 is a little better
         dice = dice_loss(pred, target)
         jaccard_loss = metric_jaccard(pred, target)    
-        loss = bce * bce_weight + dice * (1 - bce_weight)
-    
+        #loss = bce * bce_weight + dice * (1 - bce_weight)
+        loss = bce * bce_weight + dice[0] * (1 - bce_weight)
+            
         metrics['bce'] = bce.data.cpu().numpy() * target.size(0)
         metrics['loss'] = loss.data.cpu().numpy() * target.size(0)
-        metrics['dice'] =1- dice.data.cpu().numpy() * target.size(0)
-        metrics['jaccard'] = 1-jaccard_loss.data.cpu().numpy() * target.size(0)
+        #metrics['dice'] =1- dice.data.cpu().numpy() * target.size(0)
+        #metrics['jaccard'] = 1-jaccard_loss.data.cpu().numpy() * target.size(0)
+        metrics['dice'] = 1 - dice[0].data.cpu().numpy() * target.size(0)
+        metrics['dice_class'] = 1 - dice[1].data.cpu().numpy() * target.size(0)
+        metrics['jaccard'] = 1 - jaccard_loss[0].data.cpu().numpy() * target.size(0)
+        metrics['jaccard_class'] = 1 - jaccard_loss[1].data.cpu().numpy() * target.size(0)
+        
     else:
         dice = dice_loss(pred, target)
         jaccard_loss = metric_jaccard(pred, target)    
-        loss = bce * bce_weight + dice * (1 - bce_weight)
+        #loss = bce * bce_weight + dice * (1 - bce_weight)
+        loss = bce * bce_weight + dice[0] * (1 - bce_weight)
+            
         metrics['bce'] += bce.data.cpu().numpy() * target.size(0)
         metrics['loss'] += loss.data.cpu().numpy() * target.size(0)
-        metrics['dice_loss'] += dice.data.cpu().numpy() * target.size(0)
-        metrics['jaccard_loss'] += jaccard_loss.data.cpu().numpy() * target.size(0)
-
+        #metrics['dice_loss'] += dice.data.cpu().numpy() * target.size(0)
+        #metrics['jaccard_loss'] += jaccard_loss.data.cpu().numpy() * target.size(0)
+        metrics['dice_loss'] += dice[0].data.cpu().numpy() * target.size(0)
+        metrics['dice_class'] += dice[1].data.cpu().numpy() * target.size(0)
+        metrics['jaccard_loss'] += jaccard_loss[0].data.cpu().numpy() * target.size(0)
+        metrics['jaccard_class'] += jaccard_loss[1].data.cpu().numpy() * target.size(0)
+        
     return loss
 
 
@@ -57,6 +69,14 @@ def print_metrics(metrics, file, phase='train', epoch_samples=1 ):
     outputs = []
     for k in metrics.keys():
         outputs.append("{}: {:4f}".format(k, metrics[k] / epoch_samples ))
+        
+        if k == 'dice_class':
+            outputs.append('dice_class: {:4}'.format('{}'.format(metrics[k] / epoch_samples)))
+        elif k == 'jaccard_class':
+            outputs.append('jaccard_class: {:4}'.format('{}'.format(metrics[k] / epoch_samples)))
+        else:
+            outputs.append("{}: {:4f}".format(k, metrics[k] / epoch_samples ))
+            
     if phase=='test':
         file.write("{}".format(",".join(outputs)))
     else:          
@@ -112,8 +132,9 @@ def find_metrics(train_file_names,val_file_names, test_file_names, channels,max_
         labels_vec = []
         pred_vec = []
         result_dice = []
+        result_dice_classes = []
         result_jaccard = []
-
+        result_jaccard_classes = []
         
         for inputs, labels in dataloaders[phase]:
             inputs = inputs.to(device)
@@ -132,19 +153,26 @@ def find_metrics(train_file_names,val_file_names, test_file_names, channels,max_
                 pred_vec.append(pred.data.cpu().numpy())    
 
                 result_dice += [metrics['dice']]
-
+                result_dice_classes += [metrics['dice_class']]
+                
                 result_jaccard += [metrics['jaccard'] ]
-
+                result_jaccard_classes += [metrics['jaccard_class']]
+                    
                 count_img += 1
 
         print(("{}_{}").format(phase,out_file))
         print('Dice = ', np.mean(result_dice), np.std(result_dice))
-        print('Jaccard = ',np.mean(result_jaccard), np.std(result_jaccard),'\n')
+       # print('Jaccard = ',np.mean(result_jaccard), np.std(result_jaccard),'\n')
+        print('Dice classes= ', np.mean(result_dice_classes,axis=0))
+        print('Jaccard = ',np.mean(result_jaccard), np.std(result_jaccard))
+        print('Jaccard classes= ', np.mean(result_jaccard_classes,axis=0),'\n')
+        
 
         f.write(("{}_{}\n").format(phase,out_file))
         f.write("dice_metric: {:4f}, std: {:4f} \n".format(np.mean(result_dice),np.std(result_dice)))
+        f.write("dice_per_class: {:4} \n".format('{}'.format(np.mean(result_dice_classes,axis=0))))
         f.write("jaccard_metric: {:4f}, std: {:4f}  \n".format(np.mean(result_jaccard), np.std(result_jaccard)))    
-
+        f.write("jaccard_per_class: {:4} \n".format('{}'.format(np.mean(result_jaccard_classes,axis=0))))
     
         if phase=='test':      
             np.save(str(os.path.join(outfile_path,"inputs_test{}_{}_foldout{}_foldin{}_{}epochs_{}.npy".format(name_file,name_model,fold_out,fold_in,epochs,int(count_img)))), np.array(input_vec))
