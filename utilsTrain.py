@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import os
 
 from loss import dice_loss,metric_jaccard
-from metrics_prediction_2 import calc_loss,print_metrics 
+from metrics_prediction_2 import calc_loss, calc_loss_MS, print_metrics
 
 
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
@@ -61,7 +61,8 @@ def train_model(dataset_file,name_file, model, optimizer, scheduler,dataloaders,
 
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
-                    loss = calc_loss(outputs, labels, metrics)
+                    #loss = calc_loss(outputs, labels, metrics)
+                    loss = calc_loss_MS(outputs, labels, inputs)
                     
                     if phase == 'train':
                         loss.backward()

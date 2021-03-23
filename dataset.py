@@ -65,6 +65,7 @@ def to_float_tensor(img):
 
 def load_image(path,channels): #in CH, H,W  out: H,W,CH
     img = np.load(str(path))
+
     img=img.transpose((1, 2, 0))  
     return  img 
 

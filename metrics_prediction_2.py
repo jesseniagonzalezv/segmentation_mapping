@@ -2,10 +2,10 @@ import helper
 from collections import defaultdict
 from helper import reverse_transform
 from torch.utils.data import DataLoader
-from loss import dice_loss,metric_jaccard  #this is loss
+from loss import dice_loss, metric_jaccard, levelsetLoss, gradientLoss2d
 from dataset import ImagesDataset
 import torch.nn.functional as F
-from models import UNet11, UNet, AlbuNet34,SegNet
+from models import UNet11, UNet, AlbuNet34, SegNet
 import numpy as np
 import torch
 import glob
@@ -13,6 +13,7 @@ import os
 import numpy as np
 from pathlib import Path
 from scalarmeanstd import meanstd
+import pdb
 
 from transformsdata import (DualCompose,
                         ImageOnly,
@@ -56,6 +57,48 @@ def calc_loss(pred, target, metrics,phase='train', bce_weight=0.5):
 
     return loss
 
+# Using semi-supervised approach with Mumford-Shah loss functional
+def calc_loss_MS(pred, target, inputs):
+    
+    criterionCE = torch.nn.CrossEntropyLoss()
+    criterionLS = levelsetLoss()
+    criterionTV = gradientLoss2d()
+        
+    loss_C = 0
+    numch = 0
+    
+    #Supervised training method
+    #targetCE = torch.argmax(target,dim=1)
+    #if torch.max(targetCE[0, 0]) != 0: # if target exists
+    #    loss_C = criterionCE(pred,targetCE)
+       
+    #Calculates cross entropy per image, checks if image has target label
+    for ibatch in range(target.shape[0]):
+        if torch.max(target[ibatch, 0]) != 0: # if target exists
+            
+            realB = target[ibatch, :].unsqueeze(0)
+            realB = torch.argmax(realB, dim=1)
+            fakeB = pred[ibatch, :].unsqueeze(0)
+           
+            loss_C += criterionCE(fakeB, realB.long())  # * 100
+            numch += 1.0
+    
+    if numch > 0:
+        loss_C = loss_C / numch
+    else:
+        loss_C = 0
+        
+    m = torch.nn.Softmax(dim=1)
+    predSoftmax =  m(pred)
+    #predClamps = torch.clamp(pred[:,:], 1e-10, 1.0)
+
+    loss_L = criterionLS(predSoftmax, inputs)
+    loss_A = criterionTV(predSoftmax) * 0.001
+    loss_LS = (loss_L + loss_A) * 0.000001 #lambda_A (weight for cycle loss (A -> B -> A))
+
+    loss_tot = loss_C + loss_LS
+
+    return loss_tot
 
 
 def print_metrics(metrics, file, phase='train', epoch_samples=1 ):    
@@ -105,14 +148,13 @@ def find_metrics(train_file_names,val_file_names, test_file_names, channels,max_
             ])
 
 
-    train_loader = make_loader(train_file_names,channels,shuffle=True, transform=all_transform)
-    val_loader = make_loader(val_file_names,channels, transform=all_transform)
+    #train_loader = make_loader(train_file_names,channels,shuffle=True, transform=all_transform)
+    #val_loader = make_loader(val_file_names,channels, transform=all_transform)
     test_loader = make_loader(test_file_names,channels, transform=all_transform)
 
-    dataloaders = {
-    'train': train_loader, 'val': val_loader, 'test':test_loader    }
+    dataloaders = {'test':test_loader}
 
-    for phase in ['train', 'val','test']:
+    for phase in ['test']:
         model.eval()
         metrics = defaultdict(float)
     ###############################  train images ###############################
